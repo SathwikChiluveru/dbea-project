@@ -11,8 +11,38 @@ import {
   HStack,
 } from '@chakra-ui/react'
 import { PinInput, PinInputField } from '@chakra-ui/react'
+import { useState } from 'react'
 
-export default function VerifyOTPForm() {
+
+export default function VerifyOTPForm({ verificationSid }) {
+  const [otp, setOtp] = useState('');
+
+  // Function to verify OTP
+  const verifyOTP = async () => {
+    try {
+      const response = await fetch(
+        'https://personal-wudetvzg.outsystemscloud.com/AuthService/rest/projNotification/projVerifyOTP',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Contacts-Key': '46fb6999-7a3b-4d7a-a59c-334dbbf6b604',
+          },
+          body: JSON.stringify({ VerificationSid: verificationSid, Code: otp }),
+        }
+      );
+      const data = await response.json();
+      if (data.Success) {
+        console.log('OTP verified successfully:', data.Status);
+        // Proceed with the next step in the login process
+      } else {
+        console.error('Error verifying OTP:', data.ErrorMessage);
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+    }
+  };
+
   return (
     <Flex
       minH={'50vh'}
@@ -43,7 +73,7 @@ export default function VerifyOTPForm() {
         <FormControl>
           <Center>
             <HStack>
-              <PinInput>
+              <PinInput onChange={(value) => setOtp(value)}>
                 <PinInputField />
                 <PinInputField />
                 <PinInputField />
@@ -61,6 +91,7 @@ export default function VerifyOTPForm() {
             _hover={{
               bg: 'gray.800',
             }}
+            onClick={verifyOTP}
           >
             Verify
           </Button>

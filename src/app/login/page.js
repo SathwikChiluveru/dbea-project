@@ -13,19 +13,40 @@ import {
 import { useState } from 'react'
 import VerifyOTPForm from '@/components/VerifyOTP';
 
-// Function to simulate sending OTP
-function sendOTP() {
-  console.log('OTP sent');
-  // This function is currently empty, but here you would implement your OTP sending logic
-}
-
 export default function LoginWithPhoneForm() {
   const [showOTPForm, setShowOTPForm] = useState(false);
+  const [phone, setPhone] = useState(''); // Store only the phone number as a string
+  const [verificationSid, setVerificationSid] = useState(null);
 
-  // Handle "Send OTP" click
-  const handleSendOTP = () => {
-    sendOTP();
-    setShowOTPForm(true); // Show OTP form after sending OTP
+  // Function to send OTP
+  const handleSendOTP = async () => {
+
+    // Ensure phone number starts with +65
+    const formattedPhone = phone.startsWith('+65') ? phone : `+65${phone}`;
+
+    try {
+      const response = await fetch(
+        'https://personal-wudetvzg.outsystemscloud.com/AuthService/rest/projNotification/projSendOTP',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Contacts-Key': '46fb6999-7a3b-4d7a-a59c-334dbbf6b604',
+          },
+          body: JSON.stringify({ Mobile: formattedPhone }),
+        }
+      );
+      const data = await response.json();
+      if (data.Success) {
+        console.log('OTP sent successfully');
+        setVerificationSid(data.VerificationSid); // Store VerificationSid to use in verification
+        setShowOTPForm(true); // Show OTP form after sending OTP
+      } else {
+        console.error('Error sending OTP:', data.ErrorMessage);
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+    }
   };
 
   return (
@@ -61,6 +82,8 @@ export default function LoginWithPhoneForm() {
                 placeholder="Your phone number"
                 _placeholder={{ color: 'gray.500' }}
                 type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </FormControl>
             <Stack spacing={6}>
@@ -77,7 +100,7 @@ export default function LoginWithPhoneForm() {
             </Stack>
           </>
         ) : (
-          <VerifyOTPForm />
+          <VerifyOTPForm verificationSid={verificationSid}/>
         )}
       </Stack>
     </Flex>
