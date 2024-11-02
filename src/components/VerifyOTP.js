@@ -5,20 +5,25 @@ import {
   Button,
   FormControl,
   Flex,
-  Input,
   Stack,
   useColorModeValue,
   HStack,
+  useToast
 } from '@chakra-ui/react'
 import { PinInput, PinInputField } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 
 export default function VerifyOTPForm({ verificationSid }) {
   const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false)
+  const toast = useToast();
+  const router = useRouter();
 
   // Function to verify OTP
   const verifyOTP = async () => {
+    setIsLoading(true)
     try {
       const response = await fetch(
         'https://personal-wudetvzg.outsystemscloud.com/AuthService/rest/projNotification/projVerifyOTP',
@@ -34,12 +39,36 @@ export default function VerifyOTPForm({ verificationSid }) {
       const data = await response.json();
       if (data.Success) {
         console.log('OTP verified successfully:', data.Status);
+        toast({
+          title: 'Verification Successful',
+          description: 'You have successfully verified your OTP.',
+          status: 'success',
+          duration: 1000,
+          isClosable: true,
+        });
+        router.push('/risk-quiz'); 
         // Proceed with the next step in the login process
       } else {
         console.error('Error verifying OTP:', data.ErrorMessage);
+        toast({
+          title: 'Verification Failed',
+          description: 'Please try again.',
+          status: 'error',
+          duration: 1000,
+          isClosable: true,
+        });
       }
     } catch (error) {
       console.error('Network error:', error);
+      toast({
+        title: 'Network Error',
+        description: 'Unable to verify OTP. Please try again.',
+        status: 'error',
+        duration: 1000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false); 
     }
   };
 
@@ -92,6 +121,7 @@ export default function VerifyOTPForm({ verificationSid }) {
               bg: 'gray.800',
             }}
             onClick={verifyOTP}
+            isLoading={isLoading}
           >
             Verify
           </Button>
