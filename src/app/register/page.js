@@ -34,7 +34,7 @@ export default function RegisterPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Contacts-Key': '46fb6999-7a3b-4d7a-a59c-334dbbf6b604',
+            'X-Contacts-Key': process.env.NEXT_PUBLIC_OTP_API_KEY,
           },
           body: JSON.stringify({ Mobile: formattedPhone }),
         }
