@@ -13,14 +13,17 @@ import {
 import { useState } from 'react'
 import VerifyOTPForm from '@/components/VerifyOTP';
 
-export default function LoginWithPhoneForm() {
+
+export default function RegisterPage() {
   const [showOTPForm, setShowOTPForm] = useState(false);
   const [phone, setPhone] = useState(''); // Store only the phone number as a string
+  const [isLoading, setIsLoading] = useState(false)
   const [verificationSid, setVerificationSid] = useState(null);
 
   // Function to send OTP
   const handleSendOTP = async () => {
 
+    setIsLoading(true)
     // Ensure phone number starts with +65
     const formattedPhone = phone.startsWith('+65') ? phone : `+65${phone}`;
 
@@ -39,13 +42,15 @@ export default function LoginWithPhoneForm() {
       const data = await response.json();
       if (data.Success) {
         console.log('OTP sent successfully');
-        setVerificationSid(data.VerificationSid); // Store VerificationSid to use in verification
+        setVerificationSid(data.VerificationSid); 
         setShowOTPForm(true); // Show OTP form after sending OTP
       } else {
         console.error('Error sending OTP:', data.ErrorMessage);
       }
     } catch (error) {
       console.error('Network error:', error);
+    } finally {
+      setIsLoading(false); 
     }
   };
 
@@ -94,6 +99,7 @@ export default function LoginWithPhoneForm() {
                   bg: 'gray.800',
                 }}
                 onClick={handleSendOTP}
+                isLoading={isLoading}
               >
                 Send OTP
               </Button>

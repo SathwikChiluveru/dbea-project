@@ -11,6 +11,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useRouter } from 'next/navigation'
 
 import {
   FcViewDetails,
@@ -50,6 +51,7 @@ const Card = ({ heading, description, icon, href }) => {
 }
 
 export default function Hero() {
+  const router = useRouter()
   return (
     <Box p={4}>
       <Stack spacing={4} as={Container} maxW={'3xl'} textAlign={'center'}>
@@ -62,7 +64,7 @@ export default function Hero() {
       </Stack>
       
       <Flex justify="center" mt={4}>
-        <Button colorPalette="gray" variant="outline">Get Started</Button>
+        <Button colorPalette="gray" variant="outline" onClick={() => router.push('/register')}>Get Started</Button>
       </Flex>
 
       <Container maxW={'5xl'} mt={12}>
@@ -91,7 +93,7 @@ export default function Hero() {
         </Heading>
       </Flex>
 
-      <Flex justify="center" mt={4}>
+      <Flex justify="center" mt={4} mb={10}>
         <Text color={'gray.600'} fontSize={{ base: 'sm', sm: 'lg' }}>
           Learn about investments through interactive games and challenges. Stay tuned!
         </Text>

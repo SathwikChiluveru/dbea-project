@@ -11,6 +11,7 @@ import {
   useBreakpointValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import Link from 'next/link'
 
 export default function Navbar() {
   const { isOpen, onToggle } = useDisclosure()
@@ -38,15 +39,16 @@ export default function Navbar() {
           />
         </Flex>
         <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }}>
-          <Text
-            textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
-            fontFamily={'heading'}
-            fontSize={'xl'}
-            fontWeight={'bold'}
-            color={useColorModeValue('gray.800', 'white')}>
-            RoboAdvisor
-          </Text>
-
+          <Link href="/" passHref>
+            <Text
+              textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
+              fontFamily={'heading'}
+              fontSize={'xl'}
+              fontWeight={'bold'}
+              color={useColorModeValue('gray.800', 'white')}>
+              RoboAdvisor
+            </Text>
+          </Link>
           <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
           </Flex>
         </Flex>
@@ -56,12 +58,6 @@ export default function Navbar() {
           justify={'flex-end'}
           direction={'row'}
           spacing={6}>
-          <Button as={'a'} fontSize={'sm'} fontWeight={400} variant={'link'} href={'#'}>
-            Sign In
-          </Button>
-          <Button as={'a'} fontSize={'sm'} fontWeight={400} variant={'link'} href={'#'}>
-            Sign Up
-          </Button>
         </Stack>
       </Flex>
     </Box>
