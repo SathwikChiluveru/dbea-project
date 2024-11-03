@@ -1,114 +1,222 @@
 'use client'
 
-import {
-  Button,
-  FormControl,
-  Flex,
-  Heading,
-  Input,
-  Stack,
-  Text,
-  useColorModeValue,
-} from '@chakra-ui/react'
 import { useState } from 'react'
-import VerifyOTPForm from '@/components/VerifyOTP';
+import { Box, Button, Checkbox, FormControl, FormLabel, Heading, Input, Stack, Text, VStack, SimpleGrid, Divider, Card } from '@chakra-ui/react'
 
+export default function SimpleCustomerOnboardingForm() {
+  const [formData, setFormData] = useState({
+    icNumber: '',
+    familyName: '',
+    givenName: '',
+    dateOfBirth: '',
+    gender: '',
+    occupation: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    country: '',
+    postalCode: '',
+    emailAddress: '',
+    countryCode: '',
+    mobileNumber: '',
+    phoneCountryCode: '',
+    phoneAreaCode: '',
+    phoneLocalNumber: '',
+    preferredUserld: '',
+    currency: '',
+    positionTitle: '',
+    yearOfService: 0,
+    employerName: '',
+    officeAddress1: '',
+    officeAddress2: '',
+    officeAddress3: '',
+    officeContactNumber: '',
+    officeContactNumberExt: '',
+    workingInSingapore: false,
+    createDepositAccount: false,
+    password: '',
+    tenantId: '',
+    customerType: '',
+    annualSalary: 0
+  })
 
-export default function RegisterPage() {
-  const [showOTPForm, setShowOTPForm] = useState(false);
-  const [phone, setPhone] = useState(''); // Store only the phone number as a string
-  const [isLoading, setIsLoading] = useState(false)
-  const [verificationSid, setVerificationSid] = useState(null);
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
 
-  // Function to send OTP
-  const handleSendOTP = async () => {
-
-    setIsLoading(true)
-    // Ensure phone number starts with +65
-    const formattedPhone = phone.startsWith('+65') ? phone : `+65${phone}`;
-
+  const handleSubmit = async (e) => {
+    e.preventDefault()
     try {
-      const response = await fetch(
-        'https://personal-wudetvzg.outsystemscloud.com/AuthService/rest/projNotification/projSendOTP',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Contacts-Key': process.env.NEXT_PUBLIC_OTP_API_KEY,
-          },
-          body: JSON.stringify({ Mobile: formattedPhone }),
-        }
-      );
-      const data = await response.json();
-      if (data.Success) {
-        console.log('OTP sent successfully');
-        setVerificationSid(data.VerificationSid); 
-        setShowOTPForm(true); // Show OTP form after sending OTP
-      } else {
-        console.error('Error sending OTP:', data.ErrorMessage);
+      const response = await fetch('/customer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      if (!response.ok) {
+        throw new Error('Failed to submit form')
       }
+      alert('Customer onboarded successfully!')
     } catch (error) {
-      console.error('Network error:', error);
-    } finally {
-      setIsLoading(false); 
+      console.error('Error:', error)
+      alert('Error onboarding customer. Please try again.')
     }
-  };
+  }
 
   return (
-    <Flex
-      minH={'90vh'}
-      align={'center'}
-      justify={'center'}
-      bg={useColorModeValue('gray.50', 'gray.800')}
-    >
-      <Stack
-        spacing={4}
-        w={'full'}
-        maxW={'md'}
-        bg={useColorModeValue('white', 'gray.700')}
-        rounded={'xl'}
-        boxShadow={'lg'}
-        p={6}
-        my={12}
-      >
-        {!showOTPForm ? (
-          <>
-            <Heading lineHeight={1.1} fontSize={{ base: '2xl', md: '3xl' }}>
-              Login with Phone Number
+    <Box maxW="4xl" mx="auto" p={4} mb={2}>
+      <Card p={6} boxShadow="lg">
+        <Box textAlign="center" mb={4}>
+            <Heading as="h2" size="lg">
+                Registration Form
             </Heading>
-            <Text
-              fontSize={{ base: 'sm', sm: 'md' }}
-              color={useColorModeValue('gray.800', 'gray.400')}
-            >
-              Enter your phone number to receive an OTP
-            </Text>
-            <FormControl id="phone">
-              <Input
-                placeholder="Your phone number"
-                _placeholder={{ color: 'gray.500' }}
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </FormControl>
-            <Stack spacing={6}>
-              <Button
-                bg={'black'}
-                color={'white'}
-                _hover={{
-                  bg: 'gray.800',
-                }}
-                onClick={handleSendOTP}
-                isLoading={isLoading}
-              >
-                Send OTP
-              </Button>
-            </Stack>
-          </>
-        ) : (
-          <VerifyOTPForm verificationSid={verificationSid}/>
-        )}
-      </Stack>
-    </Flex>
-  );
+            <Text mt={2}>Please fill in the information below to create your account.</Text>
+        </Box>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={6} align="start" width="full">
+
+            {/* Personal Information Section */}
+            <Box width="full">
+              <Heading as="h3" size="md" mb={2}>Personal Information</Heading>
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                <FormControl>
+                  <FormLabel>IC Number</FormLabel>
+                  <Input name="icNumber" value={formData.icNumber} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Family Name</FormLabel>
+                  <Input name="familyName" value={formData.familyName} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Given Name</FormLabel>
+                  <Input name="givenName" value={formData.givenName} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Date of Birth</FormLabel>
+                  <Input name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Gender</FormLabel>
+                  <Input name="gender" value={formData.gender} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Occupation</FormLabel>
+                  <Input name="occupation" value={formData.occupation} onChange={handleInputChange} />
+                </FormControl>
+              </SimpleGrid>
+            </Box>
+
+            <Divider />
+
+            {/* Contact Information Section */}
+            <Box width="full">
+              <Heading as="h3" size="md" mb={2}>Contact Information</Heading>
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                <FormControl>
+                  <FormLabel>Street Address</FormLabel>
+                  <Input name="streetAddress" value={formData.streetAddress} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>City</FormLabel>
+                  <Input name="city" value={formData.city} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>State</FormLabel>
+                  <Input name="state" value={formData.state} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Country</FormLabel>
+                  <Input name="country" value={formData.country} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Postal Code</FormLabel>
+                  <Input name="postalCode" value={formData.postalCode} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Email Address</FormLabel>
+                  <Input name="emailAddress" value={formData.emailAddress} onChange={handleInputChange} />
+                </FormControl>
+              </SimpleGrid>
+            </Box>
+
+            <Divider />
+
+            {/* Job Information Section */}
+            <Box width="full">
+              <Heading as="h3" size="md" mb={2}>Job Information</Heading>
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                <FormControl>
+                  <FormLabel>Employer Name</FormLabel>
+                  <Input name="employerName" value={formData.employerName} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Position Title</FormLabel>
+                  <Input name="positionTitle" value={formData.positionTitle} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Years of Service</FormLabel>
+                  <Input name="yearOfService" type="number" value={formData.yearOfService} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Annual Salary</FormLabel>
+                  <Input name="annualSalary" type="number" value={formData.annualSalary} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl display="flex" alignItems="center">
+                  <Checkbox
+                    name="workingInSingapore"
+                    isChecked={formData.workingInSingapore}
+                    onChange={handleInputChange}
+                    mt={6}
+                  >
+                    Working in Singapore
+                  </Checkbox>
+                </FormControl>
+              </SimpleGrid>
+            </Box>
+
+            <Divider />
+
+            {/* Account Preferences Section */}
+            <Box width="full">
+              <Heading as="h3" size="md" mb={2}>Account Preferences</Heading>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                <FormControl display="flex" alignItems="center">
+                  <Checkbox
+                    name="createDepositAccount"
+                    isChecked={formData.createDepositAccount}
+                    onChange={handleInputChange}
+                    mt={5}
+                  >
+                    Create Deposit Account
+                  </Checkbox>
+                </FormControl>
+              </SimpleGrid>
+            </Box>
+            {/* Password Field */}
+            <Box width="full">
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                    <FormControl>
+                    <FormLabel>Password</FormLabel>
+                    <Input name="password" type="password" value={formData.password} onChange={handleInputChange} />
+                    </FormControl>
+                    <FormControl>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <Input name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} />
+                    </FormControl>
+                </SimpleGrid>
+            </Box>
+
+            <Button type="submit" colorScheme="blue" width="full">
+              Submit
+            </Button>
+          </VStack>
+        </form>
+      </Card>
+    </Box>
+  )
 }

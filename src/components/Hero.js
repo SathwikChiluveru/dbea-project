@@ -63,8 +63,9 @@ export default function Hero() {
         </Text>
       </Stack>
       
-      <Flex justify="center" mt={4}>
+      <Flex justify="center" mt={4} gap={3}>
         <Button colorPalette="gray" variant="outline" onClick={() => router.push('/register')}>Get Started</Button>
+        <Button bg={'black'} color={'white'} variant="outline" onClick={() => router.push('/login')}>Login</Button>
       </Flex>
 
       <Container maxW={'5xl'} mt={12}>
