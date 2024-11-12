@@ -13,44 +13,43 @@ import {
 import { useState } from 'react'
 import VerifyOTPForm from '@/components/VerifyOTP';
 
-
 export default function LoginPage() {
   const [showOTPForm, setShowOTPForm] = useState(false);
-  const [phone, setPhone] = useState(''); // Store only the phone number as a string
-  const [isLoading, setIsLoading] = useState(false)
+  const [phone, setPhone] = useState('');
+  const [formattedPhone, setFormattedPhone] = useState(''); // New state to store formatted phone number
+  const [isLoading, setIsLoading] = useState(false);
   const [verificationSid, setVerificationSid] = useState(null);
 
   // Function to send OTP
   const handleSendOTP = async () => {
-
-    setIsLoading(true)
-    // Ensure phone number starts with +65
-    const formattedPhone = phone.startsWith('+65') ? phone : `+65${phone}`;
+    setIsLoading(true);
+    const formattedPhoneValue = phone.startsWith('+65') ? phone : `+65${phone}`;
+    setFormattedPhone(formattedPhoneValue); // Set the formatted phone in state
 
     try {
       const response = await fetch(
-        'https://personal-wudetvzg.outsystemscloud.com/AuthService/rest/projNotification/projSendOTP',
+        'https://personal-wudetvzg.outsystemscloud.com/LoginService/rest/Login/Login',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Contacts-Key': process.env.NEXT_PUBLIC_OTP_API_KEY,
+            'X-Contacts-Key': process.env.NEXT_PUBLIC_LOGIN_API_KEY,
           },
-          body: JSON.stringify({ Mobile: formattedPhone }),
+          body: JSON.stringify({ Mobile: formattedPhoneValue }),
         }
       );
       const data = await response.json();
       if (data.Success) {
         console.log('OTP sent successfully');
-        setVerificationSid(data.VerificationSid); 
-        setShowOTPForm(true); // Show OTP form after sending OTP
+        setVerificationSid(data.VerificationSid);
+        setShowOTPForm(true);
       } else {
         console.error('Error sending OTP:', data.ErrorMessage);
       }
     } catch (error) {
       console.error('Network error:', error);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
@@ -106,7 +105,7 @@ export default function LoginPage() {
             </Stack>
           </>
         ) : (
-          <VerifyOTPForm verificationSid={verificationSid}/>
+          <VerifyOTPForm verificationSid={verificationSid} phone={formattedPhone} />
         )}
       </Stack>
     </Flex>

@@ -15,7 +15,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 
-export default function VerifyOTPForm({ verificationSid }) {
+export default function VerifyOTPForm({ verificationSid, phone }) {
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false)
   const toast = useToast();
@@ -26,12 +26,12 @@ export default function VerifyOTPForm({ verificationSid }) {
     setIsLoading(true)
     try {
       const response = await fetch(
-        'https://personal-wudetvzg.outsystemscloud.com/AuthService/rest/projNotification/projVerifyOTP',
+        `https://personal-wudetvzg.outsystemscloud.com/LoginService/rest/Login/VerifyLogin?Mobile=${encodeURIComponent(phone)}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Contacts-Key': process.env.NEXT_PUBLIC_OTP_API_KEY,
+            'X-Contacts-Key': process.env.NEXT_PUBLIC_LOGIN_API_KEY,
           },
           body: JSON.stringify({ VerificationSid: verificationSid, Code: otp }),
         }
@@ -39,6 +39,7 @@ export default function VerifyOTPForm({ verificationSid }) {
       const data = await response.json();
       if (data.Success) {
         console.log('OTP verified successfully:', data.Status);
+        localStorage.setItem('userPhone', phone);
         toast({
           title: 'Verification Successful',
           description: 'You have successfully verified your OTP.',
@@ -46,7 +47,7 @@ export default function VerifyOTPForm({ verificationSid }) {
           duration: 1000,
           isClosable: true,
         });
-        router.push('/risk-quiz'); 
+        router.push('/profile'); 
         // Proceed with the next step in the login process
       } else {
         console.error('Error verifying OTP:', data.ErrorMessage);

@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import { RecommendationProvider } from '@/context/RecommendationContext';
 import { Providers } from "./Providers";
 
 export const metadata = {
@@ -11,8 +12,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Providers>
-          <Navbar/>
-          {children}
+          <RecommendationProvider>
+            <Navbar/>
+            {children}
+          </RecommendationProvider>
         </Providers>
       </body>
     </html>

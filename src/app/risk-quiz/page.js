@@ -1,6 +1,7 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Progress,
   Box,
@@ -15,120 +16,111 @@ import {
   Stack,
   Radio,
   useToast,
-} from '@chakra-ui/react'
+} from '@chakra-ui/react';
+import { useRecommendations } from '@/context/RecommendationContext';
 
-// Questions for the quiz
 const questions = [
-  {
-    question: "How would you describe your investment experience?",
-    options: ["Novice", "Somewhat experienced", "Experienced", "Very experienced"]
-  },
-  {
-    question: "What is your primary investment goal?",
-    options: ["Preserve capital", "Generate income", "Grow wealth", "Aggressive growth"]
-  },
-  {
-    question: "How long do you plan to hold your investments?",
-    options: ["Less than 1 year", "1-3 years", "3-5 years", "More than 5 years"]
-  },
-  {
-    question: "How would you react if your investment portfolio lost 20% in a year?",
-    options: ["Sell everything", "Sell some", "Hold steady", "Buy more"]
-  },
-  {
-    question: "What percentage of your total assets are you planning to invest?",
-    options: ["Less than 10%", "10-25%", "25-50%", "More than 50%"]
-  }
-]
+  { question: "How would you describe your investment experience?", options: ["Novice", "Somewhat experienced", "Experienced", "Very experienced"] },
+  { question: "What is your primary investment goal?", options: ["Preserve capital", "Generate income", "Grow wealth", "Aggressive growth"] },
+  { question: "How long do you plan to hold your investments?", options: ["Less than 1 year", "1-3 years", "3-5 years", "More than 5 years"] },
+  { question: "How would you react if your investment portfolio lost 20% in a year?", options: ["Sell everything", "Sell some", "Hold steady", "Buy more"] },
+  { question: "What percentage of your total assets are you planning to invest?", options: ["Less than 10%", "10-25%", "25-50%", "More than 50%"] },
+  { question: "Are you open to investments in foreign markets?", options: ["Yes", "No"] }
+];
 
-// Risk profiles based on score ranges
 const riskProfiles = [
-  { label: "Conservative", range: [0, 0.25] },
-  { label: "Moderate", range: [0.25, 0.5] },
-  { label: "Growth-Oriented", range: [0.5, 0.75] },
-  { label: "Aggressive", range: [0.75, 1] },
-]
+  { label: "Low Risk", range: [0, 0.33] },
+  { label: "Medium Risk", range: [0.33, 0.66] },
+  { label: "High Risk", range: [0.66, 2] },
+];
 
-// Main component
 export default function RiskAssessmentQuiz() {
-  const toast = useToast()
-  const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState(Array(questions.length).fill(''))
-  const [isComplete, setIsComplete] = useState(false)
-  const [riskProfile, setRiskProfile] = useState("")
+  const router = useRouter(); 
+  const toast = useToast();
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState(Array(questions.length).fill(''));
+  const [isComplete, setIsComplete] = useState(false);
+  const [riskProfile, setRiskProfile] = useState("");
+  const [apiResponse, setApiResponse] = useState('');
+  const { setRecommendations, setRisk, setForeignMarketPreference } = useRecommendations();
 
-  // Calculate progress based on current question step
-  const progress = isComplete ? 100 : (step / questions.length) * 100
 
-  // Handle selection of answer
+  const progress = isComplete ? 100 : (step / questions.length) * 100;
+
   const handleAnswerChange = (value) => {
-    const newAnswers = [...answers]
-    newAnswers[step] = value
-    setAnswers(newAnswers)
-  }
+    const newAnswers = [...answers];
+    newAnswers[step] = value;
+    setAnswers(newAnswers);
+  };
 
-  // Calculate risk profile based on answers
   const calculateRiskProfile = (answers) => {
-    const riskValues = answers.map((answer, index) => {
-      const options = questions[index].options
-      return options.indexOf(answer) / (options.length - 1)
-    })
-    const averageRisk = riskValues.reduce((sum, value) => sum + value, 0) / riskValues.length
+    const riskValues = answers.slice(0, answers.length - 1).map((answer, index) => {
+      const options = questions[index].options;
+      return options.indexOf(answer) / (options.length - 1);
+    });
+    const averageRisk = riskValues.reduce((sum, value) => sum + value, 0) / riskValues.length;
     const profile = riskProfiles.find(profile => 
       averageRisk >= profile.range[0] && averageRisk < profile.range[1]
-    )
-    return profile ? profile.label : "Unknown"
-  }
+    );
+    return profile ? profile.label : "Unknown";
+  };
 
-  // Restart the quiz
-  const restartQuiz = () => {
-    setStep(0)
-    setAnswers(Array(questions.length).fill(''))
-    setIsComplete(false)
-    setRiskProfile("")
-  }
+  const getInvestmentRecommendations = async () => {
+    try {
+      const res = await fetch('/api/recommendation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ riskProfile }),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        console.error('Error from API:', data.error);
+        setApiResponse('Error occurred while fetching recommendations.');
+      } else {
+        console.log("Investment Recommendations:", data.reply);
+        setRecommendations(data.reply);
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Request error:', error);
+      setApiResponse('Failed to get response from the API.');
+    }
+  };
+
+  const handleCompleteQuiz = () => {
+    const profile = calculateRiskProfile(answers);
+    const foreignMarketPreference = answers[5] === "Yes"; // Assuming question 6 is about foreign markets
+    setForeignMarketPreference(foreignMarketPreference);
+    setRiskProfile(profile);
+    setRisk(profile)
+    setIsComplete(true);
+    toast({
+      title: 'Quiz Completed',
+      description: `Your risk profile is: ${profile}`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
 
   return (
-    <Box
-      borderWidth="1px"
-      rounded="lg"
-      shadow="1px 1px 3px rgba(0,0,0,0.3)"
-      maxWidth={800}
-      p={6}
-      m="50px auto"
-      as="form">
-      
+    <Box borderWidth="1px" rounded="lg" maxWidth={800} p={6} m="50px auto" as="form">
       {isComplete ? (
         <Box textAlign="center">
-          <Heading fontSize="2xl" fontWeight="bold" color="black">Risk Profile Assessment</Heading>
-          <Text mt={2} color="gray.600" fontSize="md">
-            Let's determine your investment risk profile
-          </Text>
-          <Heading mt={6} size="lg" color="black">
-            Your Risk Profile: <Text as="span" fontWeight="bold">{riskProfile}</Text>
-          </Heading>
-          <Text mt={4} color="gray.500">
-            Based on your answers, we've determined your risk profile.
-          </Text>
-          <Text color="gray.500">
-            This will help us provide tailored investment recommendations.
-          </Text>
-          <Progress value={100} size="md" hasStripe isAnimated mt={6} mb={6} />
+          <Heading fontSize="2xl" fontWeight="bold">Risk Profile Assessment</Heading>
+          <Text mt={2} mb={4} color="blue.800">Your Risk Profile: <strong>{riskProfile}</strong></Text>
           <ButtonGroup spacing={4}>
-            <Button onClick={restartQuiz} colorScheme="gray.700" variant="link">
-              Start Over
-            </Button>
-            <Button backgroundColor="black" color="white" _hover={{ backgroundColor: "gray.700" }} variant="solid">
-              See Investment Recommendations
-            </Button>
+            <Button onClick={getInvestmentRecommendations} colorScheme="blue">See Investment Recommendations</Button>
           </ButtonGroup>
         </Box>
       ) : (
         <>
           <Progress hasStripe value={progress} mb="5%" mx="5%" isAnimated />
-          <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">
-            Risk Assessment Quiz
-          </Heading>
+          <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">Risk Assessment Quiz</Heading>
           <Box>
             <FormControl as="fieldset">
               <FormLabel as="legend" fontSize="lg">
@@ -150,15 +142,7 @@ export default function RiskAssessmentQuiz() {
           </Box>
           <ButtonGroup mt="5%" w="100%">
             <Flex w="100%" justifyContent="space-between">
-              <Button
-                onClick={() => setStep(step - 1)}
-                isDisabled={step === 0}
-                colorScheme="teal"
-                variant="solid"
-                w="7rem"
-              >
-                Back
-              </Button>
+              <Button onClick={() => setStep(step - 1)} isDisabled={step === 0} colorScheme="teal" variant="solid" w="7rem">Back</Button>
               <Button
                 w="7rem"
                 colorScheme="teal"
@@ -166,18 +150,9 @@ export default function RiskAssessmentQuiz() {
                 isDisabled={!answers[step]}
                 onClick={() => {
                   if (step === questions.length - 1) {
-                    const profile = calculateRiskProfile(answers)
-                    setRiskProfile(profile)
-                    setIsComplete(true)
-                    toast({
-                      title: 'Quiz Completed',
-                      description: `Your risk profile is: ${profile}`,
-                      status: 'success',
-                      duration: 3000,
-                      isClosable: true,
-                    })
+                    handleCompleteQuiz();
                   } else {
-                    setStep(step + 1)
+                    setStep(step + 1);
                   }
                 }}
               >
@@ -188,5 +163,5 @@ export default function RiskAssessmentQuiz() {
         </>
       )}
     </Box>
-  )
+  );
 }
