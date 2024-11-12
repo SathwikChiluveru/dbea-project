@@ -15,6 +15,7 @@ export default function RecommendationCard({ title, description, investments }) 
       const username = process.env.NEXT_PUBLIC_API_USERNAME;
       const password = process.env.NEXT_PUBLIC_API_KEY;
       const authHeader = 'Basic ' + btoa(`${username}:${password}`);
+      console.log("Auth Header:", authHeader); // Debug only; remove in production
 
       const response = await fetch(`https://smuedu-dev.outsystemsenterprise.com/gateway/rest/stockmanagement/price?Symbol=${ticker}`, {
         method: 'GET',
