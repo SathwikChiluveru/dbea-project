@@ -1,14 +1,22 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRecommendations } from '@/context/RecommendationContext';
-import { Box, Heading, Text, Tabs, TabList, Tab, TabPanels, TabPanel, Card, CardBody, CardHeader, CardFooter, Divider } from '@chakra-ui/react';
+import { Box, Flex, Button, Heading, Text, Tabs, TabList, Tab, TabPanels, TabPanel, Card, CardBody, CardHeader, CardFooter, Divider } from '@chakra-ui/react';
 import RecommendationList from '@/components/RecommendationList';
 import AllocationChart from '@/components/AllocationChart';
+import { useRouter } from 'next/navigation';
+
 
 export default function DashboardPage() {
   const { recommendations, risk, foreignMarketPreference } = useRecommendations();
   const [foreignMarketRecommendations, setForeignMarketRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+
+    const handleBackToProfile = () => {
+        router.push('/profile'); 
+    };
 
   useEffect(() => {
     if (risk && foreignMarketPreference) {
@@ -30,9 +38,14 @@ export default function DashboardPage() {
 
   return (
     <Box maxW="5xl" mx="auto" p={6}>
-      <Heading as="h1" size="lg" mb={2}>
-        Your Investment Suggestions
-      </Heading>
+      <Flex justify="center" align="center" mb={8}>
+        <Heading as="h1" size="xl" textAlign="center" mr={4}>
+          Your Investment Suggestions
+        </Heading>
+        <Button bg="black" color="white" onClick={handleBackToProfile}>
+          Back to Profile
+        </Button>
+      </Flex>
       <Text fontSize="md" mb={6}>
         Based on your risk assessment: <strong>{risk}</strong>
       </Text>

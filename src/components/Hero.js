@@ -76,9 +76,9 @@ export default function Hero() {
             description={'Take our comprehensive quiz to determine your risk tolerance and get tailored investment recommendations.'}
           />
           <Card
-            heading={'Interest Rate Analysis'}
+            heading={'AI Recommended Portfolio Picks'}
             icon={<Icon as={FcBullish} w={10} h={10} />}
-            description={'Stay informed with real-time interest rate data and discover the best bond investment opportunities.'}
+            description={'Discover AI-powered portfolio suggestions tailored to your investment preferences and goals.'}
           />
           <Card
             heading={'Global Market Insights'}
@@ -87,19 +87,6 @@ export default function Hero() {
           />
         </Flex>
       </Container>
-
-      <Flex justify="center" mt={4}>
-        <Heading pt={10} fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={'bold'}>
-                Coming Soon: Educational Gamification
-        </Heading>
-      </Flex>
-
-      <Flex justify="center" mt={4} mb={10}>
-        <Text color={'gray.600'} fontSize={{ base: 'sm', sm: 'lg' }}>
-          Learn about investments through interactive games and challenges. Stay tuned!
-        </Text>
-      </Flex>
-
     </Box>
   )
 }

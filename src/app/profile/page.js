@@ -32,6 +32,10 @@ export default function ProfilePage() {
     router.push('/risk-quiz');
   };
 
+  const handleFinLitClick = () => {
+    router.push('/finlit-hub');
+  };
+
   // Fetch customer details using stored phone number
   useEffect(() => {
     const fetchCustomerDetails = async () => {
@@ -93,6 +97,16 @@ export default function ProfilePage() {
           size="sm"
         >
           Risk Assessment Quiz
+        </Button>
+        <Button 
+          position="absolute" 
+          top={14} 
+          right={4} 
+          colorScheme="green" 
+          onClick={handleFinLitClick}
+          size="sm"
+        >
+          Financial Literacy Hub
         </Button>
         <Avatar size="xl" name={`${customerData.givenName} ${customerData.familyName}`} mb={4} />
         <Heading fontSize="2xl" fontWeight="bold">{`${customerData.givenName} ${customerData.familyName}`}</Heading>
